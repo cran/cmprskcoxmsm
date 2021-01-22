@@ -1,0 +1,11 @@
+
+# Import all packages listed as Imports or Depends
+importFrom("stats", "stepfun", "na.omit", "p.adjust", "as.formula", "complete.cases", "quantile", "pnorm", "qnorm")
+importFrom("twang", "ps", "bal.table")
+importFrom("sandwich", "sandwich")
+#importFrom("grDevices", "rgb")
+import(ggplot2)
+import(graphics)
+import(survival)
+S3method(plot,PS)
+export(cif_est, doPS, plot_est_cif, pvalFormat, weight_cause_cox, plot.PS)

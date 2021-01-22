@@ -1,0 +1,286 @@
+
+
+% setwd("d:/dev/twang/{t/doc")
+% Sweave("twang.rnw"); system("texify twang.tex"); system("c:\\MiKTeX\\miktex\\bin\\yap.exe twang.dvi",wait=FALSE)
+
+\SweaveOpts{prefix.string=twang}
+
+\documentclass{article}
+\bibliographystyle{plain}
+\usepackage[active]{srcltx}
+\usepackage{url}
+\addtolength{\topmargin}{-0.5in}
+\addtolength{\textheight}{0.75in}
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\newcommand{\EV}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\aRule}{\begin{center} \rule{5in}{1mm} \end{center}}
+\usepackage[margin=1.0in]{geometry}   % sets all margins to 1in, can be changed
+\usepackage{moreverb}                 % for verbatimtabinput -- LaTeX environment
+\usepackage{url}                      % for \url{} command
+\usepackage{amssymb} % for many mathematical symbols
+\usepackage{amsmath}
+\usepackage[pdftex]{lscape}   % for landscaped tables
+\usepackage{longtable}
+\usepackage{color} %May be necessary if you want to color links
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.10}
+\usepackage{hyperref}
+
+\usepackage[normalem]{ulem} % for "tracked changes"
+\usepackage{color} % for "tracked changes"
+\newcommand{\note}[1]{{\color{blue} #1}}
+\newcommand{\dele}[1]{\textcolor{red}{\sout{#1}}} % delet in an equation
+\newcommand{\ins}[1]{\textcolor{blue}{\bf #1}} % insert
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+    -Latex,auto,node distance =1 cm and 1 cm,semithick,
+    state/.style ={ellipse, draw, minimum width = 0.7 cm},
+    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+    bidirected/.style={Latex-Latex,dashed},
+    el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+
+\title{Estimating The Treatment Effect In Failure-time Settings With Competing Events}
+
+\author{Yiran Zhang
+\\Division of Biostatistics and Bioinformatics\\
+School of Public Health, University of California San Diego}
+
+%\VignetteIndexEntry{Estimating the treatment effect in failure-time settings with competing events}
+%\VignetteDepends{twang,stats,sandwich,ggplot2}
+%\VignetteKeywords{propensity score, cause specific, cumulative incidence}
+%\VignettePackage{wcmprsk}
+
+
+\newcommand{\mathgbf}[1]{{\mbox{\boldmath$#1$\unboldmath}}}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+
+\section{Introduction}
+
+Estimating the causal effect of a treatment or exposure is not straightforward for an observational study. In the observational study, the assumption of no confounders for the exposure or treatment of interest is violated. We consider the marginal structural model with inverse probability weighting (IPW) (\cite{robins2000marginal}). For survival outcomes, \cite{hernan2001marginal} proposed the marginal structural Cox proportional hazards model to estimate the treatment effect.\\
+In failure-time settings, a competing event is any event that makes it impossible for the event of interest to occur. The main contribution of this package is, after fitting the cause-specific hazards models and estimating the cumulative incidence functions (i.e. risks), we provide inference on the risk difference or risk ratio at any given time.
+
+\section{Example: Follicular cell lymphoma study}
+
+<<echo=FALSE>>=
+options(width=80)
+@
+
+We consider the follicular cell lymphoma data from Pintilie (2007) where additional details
+also can be found. The study consists of 541 patients with early disease stage follicular cell lymphoma (I or II) and treated with radiation alone or a combination treatment of radiation and chemotherapy. We are interested in: compared to radiation only treatment, whether combination treatment has a causal effect on disease relapse. Death is then the competing event for disease relapse, and people who have no relapse or death are censored. We have the baseline covariates of interest: patient's age, haemoglobin levels, and the clinical stage.
+
+\subsection{Notation}
+
+We define $A = 1$ if the patient receives the combination treatment, we also define $T$ as the time to disease relapse, and $J$ as the event type indicator ($J=1$ is the disease relapse, $J=2$ is death). Let $T^{a}$ be the potential time to disease relapse, and $J^{a}$ be the analogous potential event-type indicator, under exposure $a=0, 1$. Let $L_{0}$ be the baseline confounders: patients age, haemoglobin levels, and the clinical stage.
+
+
+\newpage
+\subsection{Statistical Methods}
+
+The causal relationship can be shown from the below DAG:
+
+\begin{figure}[h]
+\centering
+\caption{The causal directed acyclic graph}
+\input{DAGM2.tex}
+\end{figure}
+
+We make the following assumptions:\\
+
+(i) Exchangeability: $(T^{a},J^{a}) \perp A | L_{0}$ \\
+
+(ii) Positivity: $P(A=a|L_{0})>0$ \\
+
+(iii) Consistency: If A=a, then $T^{a} = T$, $J^{a} = J$.\\
+
+
+We specify the marginal structural cause-specific cox proportional hazards model for event $j=1,2$:
+$$
+\lambda_{T^{a},J^{a}=j}(t)=\lambda_{0j}(t)e^{\beta_{j}*a},
+$$
+which is the cause-specific hazard of $T^{a}$ at t under treatment $a$, $\lambda_{0j}(t)$ is the unspecified baseline cause-specific hazards for event $j$, $e^{\beta_{j}}$ is the causal cause-specific hazard ratio for the effects of combination treatment.\\
+
+Since we do not always observe the counterfactual outcome, in order to estimate the parameter $\beta_{j}$, we use the IPW to create a pseudo population. The inverse probability weights for treatment A=a can be defined as:
+$$
+W(a) = \frac{1}{P(A=a|L_{0})}
+$$
+and the stabilized inverse probability weights for treatment A=a will be:
+$$
+SW(a) = \frac{P(A=a)}{P(A=a|L_{0})}
+$$
+
+\textbf{Estimating the cumulative incidence function (CIF)}
+
+After we estimating the cause specific hazard: $\lambda_{j}^{a}$ using IPW, we could estimate the corresponding CIF. We could use:
+
+\begin{align*}
+\hat{P}(T^{a}<t,J^{a}=j) &= \int_{0}^{t}\hat{S}^{a}(u) d \hat{\Lambda}_{j}^{a}(u),
+\end{align*}
+
+where $\hat{S}^{a}(u)$ is the estimated over all survival function for $T^{a}$, $\hat{S}^{a}(u) = e^{-\hat{\Lambda}_{1}^{a}(u)-\hat{\Lambda}_{2}^{a}(u)}$, $\hat{\Lambda}_{j}^{a}(u) = \hat{\Lambda}_{0j}(u)e^{\hat{\beta}_{j}*a}$, and $\hat{\Lambda}_{0j}(u)$ is a Breslow-type estimator of the baseline cumulative hazard (for j=1,2).
+
+\subsection{Data Analysis}
+
+\subsubsection{Generate the weights}
+<<echo = FALSE>>=
+install.packages("~/Desktop/R03/package/cmprskcoxmsm_0.1.0.tar.gz", repos = NULL, type="source")
+library(cmprskcoxmsm)
+load("follic.RData")
+@
+
+We first need to generate the IPW weights for the data, the function \texttt{doPS} will help us to do that: after having fit the \texttt{doPS} object, we will have a new dataset containing 2 types of the weights and the propensity score.
+
+<<>>=
+## Change the treatment name
+follic$treatment <- ifelse(follic$ch=="Y","Combination treatment","Radiation alone")
+
+## Distribution of the treatment
+table(follic$treatment)
+
+## make the stage as the character variable:
+follic$clinstg <- ifelse(follic$clinstg==1,"Stage I","Stage II")
+
+## Generate the weight:
+OUT1 <- doPS(dat = follic,
+             Trt = "treatment",
+             Trt.name = "Combination treatment",
+             VARS. = c("age","hgb","clinstg"))
+
+follic1 <- OUT1[["Data"]]
+@
+
+After having fit the \texttt{doPS} object, we then can check the distribution of the propensity score:
+
+<<eval=FALSE>>=
+plot(OUT1)
+@
+
+\begin{center}
+\includegraphics[width=85mm,page=1]{out1.pdf}
+\end{center}
+
+We can also check the balance as measured by standardized mean differences between the treated and control samples:
+\begin{center}
+\includegraphics[width=85mm,page=2]{out1.pdf}
+\end{center}
+
+We can tell from the second plot that all the baseline covariates are balanced well: SMD between -0.1 and 0.1.
+
+\subsubsection{Estimating the parameters}
+
+After having the estimated propensity scores and IPW, the next step is to fit the marginal structural Cox proportional hazard model for estimating treatment effects: we fit the model using the stabilized weight as the example:
+
+<<echo = FALSE>>=
+follic1$status.1 <- NA
+follic1$status.1[which(follic$status==0)] <- "No response"
+follic1$status.1[which(follic$status==1)] <- "Disease relapse"
+follic1$status.1[which(follic$status==2)] <- "Death"
+@
+
+<<>>=
+tab1 <- weight_cause_cox(follic1,
+                         time = "time",
+                         time2 = NULL,
+                         Event.var = "status.1",
+                         Event = "Disease relapse",
+                         weight.type = "Stabilized",
+                         ties = NULL)
+tab1
+@
+
+From the results, we can see that the estimated hazard ratio is $0.773$ with 95\% CI ($0.537$, $1.112$), so there is no significant treatment causal effect.
+
+\subsubsection{Estimating the CIF:}
+
+We can also estimate the CIF from the data for the different event types, the 95\% confidence interval of the CIF is calculated by bootstrap. We estimate the CIF for the disease relapse first:
+
+<<eval=FALSE>>=
+cif.dr <- cif_est(follic1,
+                  time = "time",
+                  time2 = NULL,
+                  Event.var = "status.1",
+                  Events = c("Disease relapse","Death"),
+                  cif.event = "Disease relapse",
+                  weight.type = "Stabilized",
+                  ties = NULL,
+                  risktab = TRUE,
+                  risk.time = 10)
+cif_dr <- cif.dr$cif_data
+risk_dr10 <- cif.dr$risk_tab
+@
+
+<<echo=FALSE>>=
+cif_dr <- read.csv("cif_dr.csv")[,-1]
+risk_dr10 <- read.csv("risk_dr10.csv")[,-1]
+colnames(risk_dr10) <- c("Risk Difference (95\\% CI)",
+                         "Risk Ratio (95\\% CI)")
+rownames(risk_dr10) <- c("time: 10")
+@
+
+We can plot the CIF function with 95\% confidence interval:
+<<fig=TRUE, echo=TRUE, include = TRUE, height = 7, width = 10.5>>=
+plot_est_cif(cif.dat = cif_dr,
+             color = c("#1c9099","#756bb1"),
+             ci.cif = TRUE)
+@
+
+We can also show the risk difference and risk ratio (with 95\% CI) at time = 10:
+<<>>=
+risk_dr10
+@
+
+We can then estimate the CIF for death:
+<<eval=FALSE>>=
+cif.death <- cif_est(follic1,
+                  time = "time",
+                  time2 = NULL,
+                  Event.var = "status.1",
+                  Events = c("Disease relapse","Death"),
+                  cif.event = "Death",
+                  weight.type = "Stabilized",
+                  ties = NULL,
+                  risktab = TRUE,
+                  risk.time = 10)
+cif_death <- cif.death$cif_data
+risk_death10 <- cif.death$risk_tab
+@
+
+<<echo=FALSE>>=
+cif_death <- read.csv("cif_death.csv")[,-1]
+risk_death10<- read.csv("risk_death10.csv")[,-1]
+colnames(risk_death10) <- c("Risk Difference (95\\% CI)",
+                         "Risk Ratio (95\\% CI)")
+rownames(risk_death10) <- c("Time: 10")
+@
+
+The CIF plot:
+<<fig=TRUE, echo=TRUE, include = TRUE, height = 7, width = 10.5>>=
+plot_est_cif(cif.dat = cif_death,
+             color = c("#2c7fb8","#f03b20"),
+             ci.cif = TRUE)
+@
+
+
+We can also show the risk difference and risk ratio (with 95\% CI) at time = 10:
+<<>>=
+risk_death10
+@
+
+\section{Acknowledgements}
+This work was funded by National Institutes of Health grant NIH R03 AG062432.
+
+\bibliography{refer}
+
+\end{document}
+
+
+

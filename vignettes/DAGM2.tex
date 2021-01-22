@@ -1,0 +1,12 @@
+\begin{tikzpicture}[scale=1.5, transform shape]
+
+\node[state] (1) {$A$};
+    \node[state] (2) [right =of 1] {$T, J$};
+    \node[state] (4) [above right =of 1,xshift=-0.3cm,yshift=-0.3cm] {$L_{0}$};
+
+    \path (1) edge (2);
+    \path (4) edge (1);
+    \path (4) edge (2);
+ 
+
+\end{tikzpicture}
