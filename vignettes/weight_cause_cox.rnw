@@ -47,7 +47,7 @@
 
 \title{Estimating The Treatment Effect In Failure-time Settings With Competing Events}
 
-\author{Yiran Zhang
+\author{Yiran Zhang, Ronghui Xu
 \\Division of Biostatistics and Bioinformatics\\
 School of Public Health, University of California San Diego}
 
