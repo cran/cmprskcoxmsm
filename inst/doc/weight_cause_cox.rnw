@@ -132,7 +132,6 @@ where $\hat{S}^{a}(u)$ is the estimated over all survival function for $T^{a}$, 
 
 \subsubsection{Generate the weights}
 <<echo = FALSE>>=
-install.packages("~/Desktop/R03/package/cmprskcoxmsm_0.1.0.tar.gz", repos = NULL, type="source")
 library(cmprskcoxmsm)
 load("follic.RData")
 @

@@ -1,4 +1,4 @@
-1dfc70306bb0e3cd4382f47c4f711a96 *DESCRIPTION
+d0212bc609d6c115ab21f7c23cc45480 *DESCRIPTION
 cfe33d618c5307fcfc9b2968b06c49ea *NAMESPACE
 3e7e4b1c813727f3b74003eb17aba66f *R/MSM_coxph.R
 f94932d535a13083acc703d0f95c93b9 *R/cif_est.R
@@ -6,9 +6,9 @@ f94932d535a13083acc703d0f95c93b9 *R/cif_est.R
 154d0921a667c427de5b5aec9d902b26 *R/weight.R
 45cf841c721a4880bca411e3890a71ca *build/vignette.rds
 0152bd4ca9515b4eaa8e9388437aa8d1 *data/follic.RData
-11a0e623789f5a95cddbf020cc88eb17 *inst/doc/weight_cause_cox.R
-fa15bd4dddffc878a56d94526802888e *inst/doc/weight_cause_cox.pdf
-63f2c687ba6c74cf275a26cd3e09ac3d *inst/doc/weight_cause_cox.rnw
+3573d01db5aae2147478efa8d0289c34 *inst/doc/weight_cause_cox.R
+1e7a38ac9845b568c913aece395c16f3 *inst/doc/weight_cause_cox.pdf
+00373da16bc0cd62829f46c1fa20d11d *inst/doc/weight_cause_cox.rnw
 4a17d9b091883a183a286b0bf57f9c00 *man/cif_est.Rd
 ab1dc23c4680a1735202fe993a13f8b9 *man/doPS.Rd
 a087432f4878c77bc40c7fcef18902c0 *man/follic.Rd
@@ -25,4 +25,4 @@ a7a2c8e7807b98d52b34c0b2c5ddf384 *vignettes/out1.pdf
 b7feb372f70ef327c36f5ecc1635ddaf *vignettes/refer.bib
 86c88a27c98c9f1a52024238122e6be0 *vignettes/risk_death10.csv
 b4003c87aa25fc287cc8906afb17831d *vignettes/risk_dr10.csv
-63f2c687ba6c74cf275a26cd3e09ac3d *vignettes/weight_cause_cox.rnw
+00373da16bc0cd62829f46c1fa20d11d *vignettes/weight_cause_cox.rnw
